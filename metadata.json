@@ -1,0 +1,6 @@
+{
+  "name": "Python K8s Starter",
+  "description": "A starter Python Flask application with a Dockerfile and Kubernetes deployment manifests.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
