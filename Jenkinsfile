@@ -17,13 +17,20 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                sh '''
-                    sonar-scanner \\
-                      -Dsonar.projectKey=python-app \\
-                      -Dsonar.sources=. \\
-                      -Dsonar.host.url=http://20.193.146.119:9000 \\
-                      -Dsonar.login=sqp_f4fa5d6444449d4304169aa8d4c084c2c609d2ee
-                '''
+                script {
+                    // 1. Fetch the scanner executable from Jenkins Global Tools
+                    def scannerHome = tool 'sonar-scanner'
+                    
+                    // 2. Wrap the execution in the SonarQube environment block
+                    // This automatically injects the URL and secret token configured in Jenkins UI
+                    withSonarQubeEnv(env.SONARQUBE_SERVER_NAME) {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} \
+                              -Dsonar.sources=.
+                        """
+                    }
+                }
             }
         }
         
