@@ -31,3 +31,9 @@ sudo systemctl enable jenkins
 
 # 11. Check the status to ensure it is running (look for "active (running)")
 sudo systemctl status jenkins
+
+
+
+# for password 
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
