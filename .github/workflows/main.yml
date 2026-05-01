@@ -13,13 +13,24 @@ env:
 
 jobs:
   build-and-push:
-    # This tells GitHub to spin up a fresh, temporary Ubuntu server for this run
-    runs-on: ubuntu-latest
+    # This tells GitHub to use your local self-hosted runner
+    runs-on: self-hosted
 
     steps:
       # Stage 1: Checkout Code
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      # Stage 1.5: Pip Audit (Software Composition Analysis)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: Run pip-audit
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
 
       # Stage 2: SonarQube Analysis
       - name: SonarQube Scan
@@ -49,3 +60,14 @@ jobs:
           tags: |
             ${{ env.DOCKER_IMAGE }}:${{ github.run_number }}
             ${{ env.DOCKER_IMAGE }}:latest
+
+      # Stage 5: Trivy Container Scanning (SCA)
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DOCKER_IMAGE }}:${{ github.run_number }}'
+          format: 'table'
+          exit-code: '0' # Set to 1 if you want to fail the pipeline on vulnerabilities
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
